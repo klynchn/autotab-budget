@@ -25,7 +25,10 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
             <div className="flex h-9 w-9 items-center justify-center rounded-2xl bg-primary text-primary-foreground text-sm font-bold">
               A
             </div>
-            <span className="text-lg font-bold tracking-tight">AutoTab</span>
+            <div className="flex flex-col">
+              <span className="text-lg font-bold tracking-tight leading-tight">AutoTab</span>
+              <span className="text-[10px] text-muted-foreground font-medium tracking-wide leading-none">Budget smarter, not harder.</span>
+            </div>
           </Link>
 
           <nav className="hidden items-center gap-1.5 md:flex">
