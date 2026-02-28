@@ -27,20 +27,22 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
             <span className="text-lg font-bold tracking-tight">AutoTab</span>
           </Link>
 
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
+          <nav className="hidden md:flex items-center gap-1">
+            {NAV_ITEMS.map(({ to, label, icon: Icon }) => (
+              <Link
+                key={to}
+                to={to}
+                className={`flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium transition-colors ${
+                  location.pathname === to
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
+                }`}
+              >
+                <Icon className="h-4 w-4" />
+                <span>{label}</span>
+              </Link>
+            ))}
+          </nav>
 
           <Button variant="ghost" size="icon" onClick={toggleTheme} aria-label="Toggle theme">
             {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
