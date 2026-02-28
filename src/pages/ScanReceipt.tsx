@@ -1,12 +1,13 @@
 import { useState, useCallback } from "react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { guessCategory } from "@/lib/parseEReceipt";
+import { ocrReceipt } from "@/lib/ocrReceipt";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, Category } from "@/types/transaction";
-import { Upload, FileImage, Check, Camera } from "lucide-react";
+import { Upload, FileImage, Check, Camera, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ScanReceipt() {
@@ -19,16 +20,44 @@ export default function ScanReceipt() {
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
   const [category, setCategory] = useState<Category>("Other");
   const [isDragOver, setIsDragOver] = useState(false);
+  const [scanning, setScanning] = useState(false);
 
-  const handleFile = useCallback((f: File) => {
+  const handleFile = useCallback(async (f: File) => {
     setFile(f);
+    let imageUrl: string | null = null;
     if (f.type.startsWith("image/")) {
-      const url = URL.createObjectURL(f);
-      setPreview(url);
+      imageUrl = URL.createObjectURL(f);
+      setPreview(imageUrl);
     } else {
       setPreview(null);
     }
-  }, []);
+
+    // Run OCR
+    if (f.type.startsWith("image/")) {
+      setScanning(true);
+      try {
+        const result = await ocrReceipt(f);
+        if (result.merchant) setMerchant(result.merchant);
+        if (result.amount !== null) setAmount(result.amount.toFixed(2));
+        if (result.date) setDate(result.date);
+        if (result.category) setCategory(result.category);
+        toast({
+          title: "Receipt scanned! 🎉",
+          description: result.merchant
+            ? `Found: ${result.merchant}${result.amount !== null ? ` — £${result.amount.toFixed(2)}` : ""}`
+            : "Couldn't detect details — please fill in manually.",
+        });
+      } catch {
+        toast({
+          title: "Scan failed 😕",
+          description: "Couldn't read the receipt. Please fill in the details manually.",
+          variant: "destructive",
+        });
+      } finally {
+        setScanning(false);
+      }
+    }
+  }, [toast]);
 
   const onDrop = useCallback(
     (e: React.DragEvent) => {
@@ -78,9 +107,15 @@ export default function ScanReceipt() {
           className={`relative flex flex-col items-center justify-center p-10 transition-all duration-200 cursor-pointer ${
             isDragOver ? "bg-accent" : "hover:bg-muted/30"
           }`}
-          onClick={() => document.getElementById("receipt-input")?.click()}
+          onClick={() => !scanning && document.getElementById("receipt-input")?.click()}
         >
-          {preview ? (
+          {scanning ? (
+            <div className="flex flex-col items-center gap-3 text-primary">
+              <Loader2 className="h-12 w-12 animate-spin" />
+              <span className="text-sm font-medium">Scanning receipt…</span>
+              <span className="text-xs text-muted-foreground">This may take a few seconds</span>
+            </div>
+          ) : preview ? (
             <img src={preview} alt="Receipt preview" className="max-h-48 rounded-2xl object-contain" />
           ) : file ? (
             <div className="flex flex-col items-center gap-3 text-muted-foreground">
@@ -152,9 +187,9 @@ export default function ScanReceipt() {
             </Select>
           </div>
 
-          <Button onClick={onSubmit} className="w-full gap-2 rounded-xl h-11">
-            <Check className="h-4 w-4" />
-            Add transaction
+          <Button onClick={onSubmit} disabled={scanning} className="w-full gap-2 rounded-xl h-11">
+            {scanning ? <Loader2 className="h-4 w-4 animate-spin" /> : <Check className="h-4 w-4" />}
+            {scanning ? "Scanning…" : "Add transaction"}
           </Button>
         </div>
       </div>
