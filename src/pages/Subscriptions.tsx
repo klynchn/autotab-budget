@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, CATEGORY_COLORS, Category } from "@/types/transaction";
 import { format, parseISO } from "date-fns";
-import { Bell, BellOff, Plus, RefreshCw, Camera, Loader2, FileImage } from "lucide-react";
+import { Bell, BellOff, Plus, RefreshCw, Camera, Loader2, FileImage, X } from "lucide-react";
 import { toast } from "sonner";
 
 export default function Subscriptions() {
@@ -107,7 +107,24 @@ export default function Subscriptions() {
       </div>
 
       {/* Drag & drop scan area */}
-      <div className="card-soft overflow-hidden">
+      <div className="card-soft overflow-hidden relative">
+        {(preview || file) && !scanning && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setPreview(null);
+              setFile(null);
+              setMerchant("");
+              setAmount("");
+              setCategory("Subscriptions");
+              setStartDate(new Date().toISOString().split("T")[0]);
+            }}
+            className="absolute top-3 right-3 z-10 rounded-full p-1.5 bg-muted hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+            title="Clear scan"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
         <div
           onDrop={onDrop}
           onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
