@@ -19,6 +19,8 @@ const KNOWN_MERCHANTS = [
   "amazon", "argos", "wilko", "tk maxx", "next", "h&m",
   "trip.com", "trainline", "national rail", "tfl", "uber", "bolt",
   "netflix", "spotify", "apple", "disney", "deliveroo", "just eat",
+  "giffgaff", "ee", "vodafone", "three", "o2", "sky", "bt",
+  "virgin media", "now tv", "puregym", "the gym", "youtube",
 ];
 
 const MERCHANT_DISPLAY: Record<string, string> = {
@@ -30,6 +32,9 @@ const MERCHANT_DISPLAY: Record<string, string> = {
   "trip.com": "Trip.com", "trainline": "Trainline", "national rail": "National Rail",
   "tfl": "TfL", "nando": "Nando's", "domino": "Domino's",
   "deliveroo": "Deliveroo", "just eat": "Just Eat",
+  "giffgaff": "giffgaff", "ee": "EE", "vodafone": "Vodafone", "three": "Three",
+  "o2": "O2", "sky": "Sky", "bt": "BT", "virgin media": "Virgin Media",
+  "now tv": "Now TV", "puregym": "PureGym", "the gym": "The Gym", "youtube": "YouTube",
 };
 
 /**

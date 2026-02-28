@@ -38,8 +38,18 @@ const MERCHANT_CATEGORY_MAP: Record<string, Category> = {
   "just eat": "Food & Groceries",
   ee: "Utilities",
   vodafone: "Utilities",
+  giffgaff: "Utilities",
+  three: "Utilities",
+  o2: "Utilities",
+  sky: "Utilities",
+  bt: "Utilities",
+  "virgin media": "Utilities",
   "british gas": "Utilities",
   thameswater: "Utilities",
+  puregym: "Subscriptions",
+  "the gym": "Subscriptions",
+  youtube: "Subscriptions",
+  "now tv": "Subscriptions",
 };
 
 export function guessCategory(merchant: string): Category {
