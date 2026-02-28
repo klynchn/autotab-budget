@@ -1,13 +1,11 @@
 import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
-import { Sun, Moon, LayoutDashboard, Receipt, Settings, PlusCircle, Lightbulb, RefreshCw } from "lucide-react";
+import { Sun, Moon, LayoutDashboard, Receipt, Settings, Lightbulb, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
 { to: "/", label: "Dashboard", icon: LayoutDashboard },
 { to: "/receipts", label: "Receipts", icon: Receipt },
-{ to: "/add", label: "Add Purchase", icon: PlusCircle },
-{ to: "/add", label: "Add Purchase", icon: PlusCircle },
 { to: "/insights", label: "Insights", icon: Lightbulb },
 { to: "/subscriptions", label: "Subs", icon: RefreshCw },
 { to: "/settings", label: "Budget", icon: Settings }];
