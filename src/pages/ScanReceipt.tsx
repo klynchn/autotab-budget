@@ -128,13 +128,13 @@ export default function ScanReceipt() {
                 <Camera className="h-7 w-7 text-primary" />
               </div>
               <span className="text-sm font-medium">Drop receipt here or tap to upload</span>
-              <span className="text-xs">JPG, PNG, or PDF</span>
+              <span className="text-xs">JPG or PNG</span>
             </div>
           )}
           <input
             id="receipt-input"
             type="file"
-            accept="image/*,.pdf"
+            accept="image/*"
             className="hidden"
             onChange={(e) => {
               const f = e.target.files?.[0];
