@@ -1,13 +1,12 @@
 import { useState, useCallback } from "react";
 import { useTransactions } from "@/hooks/useTransactions";
 import { guessCategory } from "@/lib/parseEReceipt";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, Category } from "@/types/transaction";
-import { Upload, FileImage, Check } from "lucide-react";
+import { Upload, FileImage, Check, Camera } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function ScanReceipt() {
@@ -43,7 +42,7 @@ export default function ScanReceipt() {
 
   const onSubmit = () => {
     if (!merchant || !amount) {
-      toast({ title: "Missing fields", description: "Please enter merchant and amount.", variant: "destructive" });
+      toast({ title: "Oops!", description: "Please fill in the merchant and amount.", variant: "destructive" });
       return;
     }
     addTransaction({
@@ -54,7 +53,7 @@ export default function ScanReceipt() {
       category,
       source: "receipt",
     });
-    toast({ title: "Transaction added", description: `£${parseFloat(amount).toFixed(2)} at ${merchant}` });
+    toast({ title: "Added! ✅", description: `£${parseFloat(amount).toFixed(2)} at ${merchant}` });
     setFile(null);
     setPreview(null);
     setMerchant("");
@@ -64,58 +63,56 @@ export default function ScanReceipt() {
   };
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 pb-20 md:pb-6">
+    <div className="mx-auto max-w-lg space-y-6 pb-24 md:pb-8">
       <div>
-        <h1 className="text-2xl font-bold">Scan Receipt</h1>
-        <p className="text-sm text-muted-foreground mt-1">Upload a receipt image and fill in the details.</p>
+        <h1 className="text-2xl font-bold">Scan a receipt 🧾</h1>
+        <p className="text-sm text-muted-foreground mt-1">Snap or upload — we'll do the rest.</p>
       </div>
 
       {/* Upload area */}
-      <Card>
-        <CardContent className="pt-6">
-          <div
-            onDrop={onDrop}
-            onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
-            onDragLeave={() => setIsDragOver(false)}
-            className={`relative flex flex-col items-center justify-center rounded-lg border-2 border-dashed p-8 transition-colors cursor-pointer ${
-              isDragOver ? "border-primary bg-accent" : "border-border hover:border-primary/50"
-            }`}
-            onClick={() => document.getElementById("receipt-input")?.click()}
-          >
-            {preview ? (
-              <img src={preview} alt="Receipt preview" className="max-h-48 rounded-md object-contain" />
-            ) : file ? (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                <FileImage className="h-10 w-10" />
-                <span className="text-sm">{file.name}</span>
+      <div className="card-soft overflow-hidden">
+        <div
+          onDrop={onDrop}
+          onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
+          onDragLeave={() => setIsDragOver(false)}
+          className={`relative flex flex-col items-center justify-center p-10 transition-all duration-200 cursor-pointer ${
+            isDragOver ? "bg-accent" : "hover:bg-muted/30"
+          }`}
+          onClick={() => document.getElementById("receipt-input")?.click()}
+        >
+          {preview ? (
+            <img src={preview} alt="Receipt preview" className="max-h-48 rounded-2xl object-contain" />
+          ) : file ? (
+            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+              <FileImage className="h-12 w-12" />
+              <span className="text-sm font-medium">{file.name}</span>
+            </div>
+          ) : (
+            <div className="flex flex-col items-center gap-3 text-muted-foreground">
+              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+                <Camera className="h-7 w-7 text-primary" />
               </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2 text-muted-foreground">
-                <Upload className="h-10 w-10" />
-                <span className="text-sm">Drop receipt here or click to upload</span>
-                <span className="text-xs">Supports JPG, PNG, PDF</span>
-              </div>
-            )}
-            <input
-              id="receipt-input"
-              type="file"
-              accept="image/*,.pdf"
-              className="hidden"
-              onChange={(e) => {
-                const f = e.target.files?.[0];
-                if (f) handleFile(f);
-              }}
-            />
-          </div>
-        </CardContent>
-      </Card>
+              <span className="text-sm font-medium">Drop receipt here or tap to upload</span>
+              <span className="text-xs">JPG, PNG, or PDF</span>
+            </div>
+          )}
+          <input
+            id="receipt-input"
+            type="file"
+            accept="image/*,.pdf"
+            className="hidden"
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) handleFile(f);
+            }}
+          />
+        </div>
+      </div>
 
       {/* Manual entry form */}
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Receipt Details</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="card-soft p-6">
+        <h3 className="text-base font-semibold mb-4">Receipt details</h3>
+        <div className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="merchant">Merchant</Label>
             <Input
@@ -126,24 +123,25 @@ export default function ScanReceipt() {
                 setMerchant(e.target.value);
                 setCategory(guessCategory(e.target.value));
               }}
+              className="rounded-xl"
             />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="amount">Amount (£)</Label>
-              <Input id="amount" type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} />
+              <Input id="amount" type="number" step="0.01" placeholder="0.00" value={amount} onChange={(e) => setAmount(e.target.value)} className="rounded-xl" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="date">Date</Label>
-              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+              <Input id="date" type="date" value={date} onChange={(e) => setDate(e.target.value)} className="rounded-xl" />
             </div>
           </div>
 
           <div className="space-y-2">
             <Label>Category</Label>
             <Select value={category} onValueChange={(v) => setCategory(v as Category)}>
-              <SelectTrigger>
+              <SelectTrigger className="rounded-xl">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -154,12 +152,12 @@ export default function ScanReceipt() {
             </Select>
           </div>
 
-          <Button onClick={onSubmit} className="w-full gap-2">
+          <Button onClick={onSubmit} className="w-full gap-2 rounded-xl h-11">
             <Check className="h-4 w-4" />
-            Add Transaction
+            Add transaction
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   );
 }

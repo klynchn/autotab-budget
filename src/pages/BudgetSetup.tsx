@@ -1,9 +1,8 @@
 import { useTransactions } from "@/hooks/useTransactions";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Settings, Save } from "lucide-react";
+import { Save } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
 import { CATEGORIES, CATEGORY_COLORS } from "@/types/transaction";
@@ -19,54 +18,45 @@ export default function BudgetSetup() {
       monthlyIncome: parseFloat(income) || 0,
       monthlyBudget: parseFloat(budgetVal) || 0,
     });
-    toast({ title: "Budget updated", description: "Your budget settings have been saved." });
+    toast({ title: "Saved! ✅", description: "Your budget's been updated." });
   };
 
   return (
-    <div className="mx-auto max-w-lg space-y-6 pb-20 md:pb-6">
+    <div className="mx-auto max-w-lg space-y-6 pb-24 md:pb-8">
       <div>
-        <h1 className="text-2xl font-bold">Budget Setup</h1>
-        <p className="text-sm text-muted-foreground mt-1">Configure your monthly income and budget.</p>
+        <h1 className="text-2xl font-bold">Budget setup 🎯</h1>
+        <p className="text-sm text-muted-foreground mt-1">Tell us what you're working with each month.</p>
       </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Financial Info
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-4">
+      <div className="card-soft p-6">
+        <h3 className="text-base font-semibold mb-4">Your finances</h3>
+        <div className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="income">Monthly Income (£)</Label>
-            <Input id="income" type="number" step="1" value={income} onChange={(e) => setIncome(e.target.value)} />
+            <Label htmlFor="income">Monthly income (£)</Label>
+            <Input id="income" type="number" step="1" value={income} onChange={(e) => setIncome(e.target.value)} className="rounded-xl" />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="budget">Monthly Budget (£)</Label>
-            <Input id="budget" type="number" step="1" value={budgetVal} onChange={(e) => setBudgetVal(e.target.value)} />
+            <Label htmlFor="budget">Monthly budget (£)</Label>
+            <Input id="budget" type="number" step="1" value={budgetVal} onChange={(e) => setBudgetVal(e.target.value)} className="rounded-xl" />
           </div>
-          <Button onClick={onSave} className="w-full gap-2">
+          <Button onClick={onSave} className="w-full gap-2 rounded-xl h-11">
             <Save className="h-4 w-4" />
-            Save Budget
+            Save budget
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="text-base">Spending Categories</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-2 gap-2">
-            {CATEGORIES.map((c) => (
-              <div key={c} className="flex items-center gap-2 rounded-md border p-2.5 text-sm">
-                <div className="h-3 w-3 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[c] }} />
-                <span>{c}</span>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+      <div className="card-soft p-6">
+        <h3 className="text-base font-semibold mb-4">Categories</h3>
+        <div className="grid grid-cols-2 gap-2.5">
+          {CATEGORIES.map((c) => (
+            <div key={c} className="flex items-center gap-2.5 rounded-xl bg-muted/50 p-3 text-sm">
+              <div className="h-3 w-3 rounded-full" style={{ backgroundColor: CATEGORY_COLORS[c] }} />
+              <span className="font-medium">{c}</span>
+            </div>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
