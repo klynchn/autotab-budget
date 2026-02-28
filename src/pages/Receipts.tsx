@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, Category } from "@/types/transaction";
-import { Camera, Check, FileImage, Loader2, Mail, PenLine, Sparkles, Zap } from "lucide-react";
+import { Camera, Check, FileImage, Loader2, Mail, PenLine, Sparkles, X, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
 type Mode = "scan" | "email" | "manual";
@@ -177,7 +177,24 @@ export default function Receipts() {
 
       {/* Scan upload area */}
       {mode === "scan" && (
-        <div className="card-soft overflow-hidden">
+        <div className="card-soft overflow-hidden relative">
+          {(preview || file) && !scanning && (
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setPreview(null);
+                setFile(null);
+                setMerchant("");
+                setAmount("");
+                setCategory("Other");
+                setDate(new Date().toISOString().split("T")[0]);
+              }}
+              className="absolute top-3 right-3 z-10 rounded-full p-1.5 bg-muted hover:bg-destructive/10 hover:text-destructive text-muted-foreground transition-all"
+              title="Clear scan"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
           <div
             onDrop={onDrop}
             onDragOver={(e) => { e.preventDefault(); setIsDragOver(true); }}
