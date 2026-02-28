@@ -8,10 +8,19 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { CATEGORIES, Category } from "@/types/transaction";
-import { Camera, Check, FileImage, Loader2, Mail, Sparkles } from "lucide-react";
+import { Camera, Check, FileImage, Loader2, Mail, PenLine, Sparkles, Zap } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
-type Mode = "scan" | "email";
+type Mode = "scan" | "email" | "manual";
+
+const QUICK_MERCHANTS = [
+  { name: "Tesco", category: "Food & Groceries" as Category },
+  { name: "TfL", category: "Transport" as Category },
+  { name: "Amazon", category: "Shopping" as Category },
+  { name: "Uber", category: "Transport" as Category },
+  { name: "Nando's", category: "Social / Nights Out" as Category },
+  { name: "Sainsbury's", category: "Food & Groceries" as Category },
+];
 
 export default function Receipts() {
   const { addTransaction } = useTransactions();
@@ -115,19 +124,24 @@ export default function Receipts() {
       currency: "GBP",
       date,
       category,
-      source: mode === "scan" ? "receipt" : "e-receipt",
+      source: mode === "scan" ? "receipt" : mode === "email" ? "e-receipt" : "manual",
     });
     toast({ title: "Added! ✅", description: `£${parseFloat(amount).toFixed(2)} at ${merchant}` });
     resetForm();
   };
 
-  const showForm = mode === "scan" || parsed;
+  const fillQuick = (name: string, cat: Category) => {
+    setMerchant(name);
+    setCategory(cat);
+  };
+
+  const showForm = mode === "scan" || mode === "manual" || parsed;
 
   return (
     <div className="mx-auto max-w-lg space-y-6 pb-24 md:pb-8">
       <div>
-        <h1 className="text-2xl font-bold">Add receipt 🧾</h1>
-        <p className="text-sm text-muted-foreground mt-1">Scan an image or paste an email receipt.</p>
+        <h1 className="text-2xl font-bold">Add transaction 💸</h1>
+        <p className="text-sm text-muted-foreground mt-1">Scan, paste, or type it in.</p>
       </div>
 
       {/* Mode toggle */}
@@ -149,6 +163,15 @@ export default function Receipts() {
         >
           <Mail className="h-4 w-4" />
           Email
+        </button>
+        <button
+          onClick={() => { setMode("manual"); resetForm(); }}
+          className={`flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+            mode === "manual" ? "bg-card text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          <PenLine className="h-4 w-4" />
+          Manual
         </button>
       </div>
 
@@ -223,11 +246,36 @@ export default function Receipts() {
         </div>
       )}
 
+      {/* Manual quick-add */}
+      {mode === "manual" && (
+        <div className="card-soft p-6">
+          <div className="flex items-center gap-2 mb-4">
+            <Zap className="h-4 w-4 text-primary" />
+            <h3 className="text-base font-semibold">Quick add</h3>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {QUICK_MERCHANTS.map((m) => (
+              <button
+                key={m.name}
+                onClick={() => fillQuick(m.name, m.category)}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-all duration-200 ${
+                  merchant === m.name
+                    ? "bg-primary text-primary-foreground shadow-sm"
+                    : "bg-muted text-muted-foreground hover:text-foreground hover:bg-muted/80"
+                }`}
+              >
+                {m.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Shared details form */}
       {showForm && (
         <div className="card-soft p-6">
           <h3 className="text-base font-semibold mb-4">
-            {mode === "email" ? "Confirm details" : "Receipt details"}
+            {mode === "email" ? "Confirm details" : mode === "manual" ? "Details" : "Receipt details"}
           </h3>
           <div className="space-y-4">
             <div className="space-y-2">
