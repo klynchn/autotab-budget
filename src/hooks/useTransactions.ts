@@ -16,6 +16,8 @@ const DEMO_TRANSACTIONS: Transaction[] = [
   { id: "10", merchant: "Spotify", amount: 10.99, currency: "GBP", date: "2026-01-10", category: "Subscriptions", source: "manual" },
   { id: "11", merchant: "Sainsbury's", amount: 35.60, currency: "GBP", date: "2026-02-12", category: "Food & Groceries", source: "receipt" },
   { id: "12", merchant: "TfL", amount: 6.80, currency: "GBP", date: "2026-02-08", category: "Transport", source: "manual" },
+  { id: "13", merchant: "PureGym", amount: 22.99, currency: "GBP", date: "2026-02-01", category: "Subscriptions", source: "manual" },
+  { id: "14", merchant: "PureGym", amount: 22.99, currency: "GBP", date: "2026-01-01", category: "Subscriptions", source: "manual" },
 ];
 
 export function useTransactions() {
