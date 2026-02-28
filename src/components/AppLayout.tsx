@@ -7,7 +7,7 @@ const NAV_ITEMS = [
 { to: "/", label: "Dashboard", icon: LayoutDashboard },
 { to: "/receipts", label: "Receipts", icon: Receipt },
 { to: "/insights", label: "Insights", icon: Lightbulb },
-{ to: "/subscriptions", label: "Subs", icon: RefreshCw },
+{ to: "/subscriptions", label: "Subscriptions", icon: RefreshCw },
 { to: "/settings", label: "Budget", icon: Settings }];
 
 
