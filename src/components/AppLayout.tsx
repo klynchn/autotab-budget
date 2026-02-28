@@ -2,6 +2,7 @@ import { Link, useLocation } from "react-router-dom";
 import { useTheme } from "@/hooks/useTheme";
 import { Sun, Moon, LayoutDashboard, Receipt, Settings, Lightbulb, RefreshCw, Plane } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import logo from "@/assets/logo.png";
 
 const NAV_ITEMS = [
 { to: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -22,9 +23,7 @@ export default function AppLayout({ children }: {children: React.ReactNode;}) {
       <header className="sticky top-0 z-50 border-b bg-card/80 backdrop-blur-sm">
         <div className="mx-auto flex h-14 max-w-5xl items-center justify-between px-4">
           <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground text-sm font-bold">
-              A
-            </div>
+            <img src={logo} alt="AutoTab logo" className="h-8 w-8 rounded-lg" />
             <span className="text-lg font-bold tracking-tight">AutoTab</span>
           </Link>
 
