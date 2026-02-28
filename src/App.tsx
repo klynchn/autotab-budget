@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import ScanReceipt from "./pages/ScanReceipt";
 import EReceipt from "./pages/EReceipt";
 import AddPurchase from "./pages/AddPurchase";
+import Insights from "./pages/Insights";
 import BudgetSetup from "./pages/BudgetSetup";
 import NotFound from "./pages/NotFound";
 
@@ -25,6 +26,7 @@ const App = () => (
             <Route path="/scan" element={<ScanReceipt />} />
             <Route path="/email" element={<EReceipt />} />
             <Route path="/add" element={<AddPurchase />} />
+            <Route path="/insights" element={<Insights />} />
             <Route path="/settings" element={<BudgetSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
