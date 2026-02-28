@@ -9,7 +9,7 @@ export interface ParsedReceipt {
   category: Category;
 }
 
-// Common UK supermarket / store names to match against
+// Common UK store / service names to match against
 const KNOWN_MERCHANTS = [
   "lidl", "aldi", "tesco", "sainsbury", "asda", "morrisons", "waitrose",
   "co-op", "coop", "iceland", "spar", "m&s", "marks & spencer", "marks and spencer",
@@ -17,45 +17,79 @@ const KNOWN_MERCHANTS = [
   "wetherspoons", "greggs", "costa", "starbucks", "mcdonald", "kfc",
   "nando", "subway", "domino", "pizza hut", "burger king",
   "amazon", "argos", "wilko", "tk maxx", "next", "h&m",
+  "trip.com", "trainline", "national rail", "tfl", "uber", "bolt",
+  "netflix", "spotify", "apple", "disney", "deliveroo", "just eat",
 ];
 
-/**
- * Run OCR on a receipt image and extract merchant + total.
- */
-export async function ocrReceipt(imageSource: string | File): Promise<ParsedReceipt> {
-  const { data } = await Tesseract.recognize(imageSource, "eng", {
-    logger: () => {}, // silence logs
-  });
+const MERCHANT_DISPLAY: Record<string, string> = {
+  "lidl": "Lidl", "aldi": "Aldi", "tesco": "Tesco", "sainsbury": "Sainsbury's",
+  "asda": "Asda", "morrisons": "Morrisons", "waitrose": "Waitrose",
+  "co-op": "Co-op", "coop": "Co-op", "m&s": "M&S",
+  "marks & spencer": "M&S", "marks and spencer": "M&S",
+  "mcdonald": "McDonald's", "b&m": "B&M", "tk maxx": "TK Maxx", "h&m": "H&M",
+  "trip.com": "Trip.com", "trainline": "Trainline", "national rail": "National Rail",
+  "tfl": "TfL", "nando": "Nando's", "domino": "Domino's",
+  "deliveroo": "Deliveroo", "just eat": "Just Eat",
+};
 
-  const text = data.text;
+/**
+ * Extract text from a PDF file using pdfjs-dist.
+ */
+async function extractTextFromPdf(file: File): Promise<string> {
+  const pdfjsLib = await import("pdfjs-dist");
+  // Use the bundled worker
+  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
+
+  const arrayBuffer = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+
+  const textParts: string[] = [];
+  for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    const pageText = content.items
+      .map((item: any) => ("str" in item ? item.str : ""))
+      .join(" ");
+    textParts.push(pageText);
+  }
+
+  return textParts.join("\n");
+}
+
+/**
+ * Process a receipt file — handles both images (OCR) and PDFs (text extraction).
+ */
+export async function ocrReceipt(file: File): Promise<ParsedReceipt> {
+  let text: string;
+
+  if (file.type === "application/pdf") {
+    text = await extractTextFromPdf(file);
+  } else {
+    const { data } = await Tesseract.recognize(file, "eng", {
+      logger: () => {},
+    });
+    text = data.text;
+  }
+
   return parseReceiptText(text);
 }
 
 /**
- * Parse raw OCR text to extract merchant, total, and date.
+ * Parse raw text to extract merchant, total, and date.
  */
 export function parseReceiptText(text: string): ParsedReceipt {
   const lines = text.split("\n").map((l) => l.trim()).filter(Boolean);
   const lowerText = text.toLowerCase();
 
-  // 1. Detect merchant — check known names first, then fall back to first non-empty line
+  // 1. Detect merchant
   let merchant = "";
   for (const known of KNOWN_MERCHANTS) {
     if (lowerText.includes(known)) {
-      // Capitalise properly
-      merchant = known.charAt(0).toUpperCase() + known.slice(1);
-      // Special cases
-      if (known === "m&s" || known === "marks & spencer" || known === "marks and spencer") merchant = "M&S";
-      if (known === "co-op" || known === "coop") merchant = "Co-op";
-      if (known === "mcdonald") merchant = "McDonald's";
-      if (known === "b&m") merchant = "B&M";
-      if (known === "tk maxx") merchant = "TK Maxx";
-      if (known === "h&m") merchant = "H&M";
+      merchant = MERCHANT_DISPLAY[known] || known.charAt(0).toUpperCase() + known.slice(1);
       break;
     }
   }
   if (!merchant && lines.length > 0) {
-    // Use the first line that looks like a name (not a number)
     for (const line of lines.slice(0, 5)) {
       if (!/^\d/.test(line) && line.length > 2 && line.length < 40) {
         merchant = line;
@@ -64,48 +98,67 @@ export function parseReceiptText(text: string): ParsedReceipt {
     }
   }
 
-  // 2. Find total amount — look for "total" line with a number
+  // 2. Find total amount
   let amount: number | null = null;
   const totalPatterns = [
-    /total\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/i,
-    /balance\s*(?:due)?\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/i,
-    /amount\s*(?:due)?\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/i,
-    /to\s*pay\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/i,
-    /grand\s*total\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/i,
+    /total\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/gi,
+    /balance\s*(?:due)?\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/gi,
+    /amount\s*(?:due)?\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/gi,
+    /to\s*pay\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/gi,
+    /grand\s*total\s*:?\s*[£$]?\s*(\d+[.,]\d{2})/gi,
   ];
 
   for (const pattern of totalPatterns) {
-    const match = lowerText.match(pattern);
-    if (match) {
-      amount = parseFloat(match[1].replace(",", "."));
+    const matches = [...lowerText.matchAll(pattern)];
+    if (matches.length > 0) {
+      // Use the last "total" match (often the final total on receipts)
+      amount = parseFloat(matches[matches.length - 1][1].replace(",", "."));
       break;
     }
   }
 
-  // Fallback: find the largest £X.XX value on the receipt
+  // Fallback: find the largest £X.XX value
   if (amount === null) {
-    const allAmounts = [...text.matchAll(/[£$]?\s?(\d+[.,]\d{2})/g)];
+    const allAmounts = [...text.matchAll(/[£$]\s?(\d+[.,]\d{2})/g)];
     if (allAmounts.length > 0) {
       const values = allAmounts.map((m) => parseFloat(m[1].replace(",", ".")));
       amount = Math.max(...values);
     }
   }
 
-  // 3. Find date
+  // 3. Find date — support multiple formats
   let date = new Date().toISOString().split("T")[0];
-  const datePatterns = [
-    /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/,  // DD/MM/YYYY or DD-MM-YYYY
+
+  // Try named month format first: "Feb 10, 2026" or "10 Feb 2026"
+  const namedDatePatterns = [
+    /(\w{3,9})\s+(\d{1,2}),?\s+(\d{4})/i,  // "Feb 10, 2026"
+    /(\d{1,2})\s+(\w{3,9})\s+(\d{4})/i,      // "10 Feb 2026"
   ];
-  for (const pattern of datePatterns) {
+
+  let dateFound = false;
+  for (const pattern of namedDatePatterns) {
     const match = text.match(pattern);
+    if (match) {
+      try {
+        const d = new Date(match[0].replace(",", ""));
+        if (!isNaN(d.getTime())) {
+          date = d.toISOString().split("T")[0];
+          dateFound = true;
+          break;
+        }
+      } catch { /* continue */ }
+    }
+  }
+
+  if (!dateFound) {
+    const numericDatePattern = /(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{2,4})/;
+    const match = text.match(numericDatePattern);
     if (match) {
       let [, day, month, year] = match;
       if (year.length === 2) year = "20" + year;
       const d = parseInt(day), m = parseInt(month);
-      // Basic validation
       if (m >= 1 && m <= 12 && d >= 1 && d <= 31) {
         date = `${year}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
-        break;
       }
     }
   }
