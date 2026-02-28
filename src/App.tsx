@@ -10,6 +10,7 @@ import EReceipt from "./pages/EReceipt";
 import AddPurchase from "./pages/AddPurchase";
 import Insights from "./pages/Insights";
 import BudgetSetup from "./pages/BudgetSetup";
+import Subscriptions from "./pages/Subscriptions";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -27,6 +28,7 @@ const App = () => (
             <Route path="/email" element={<EReceipt />} />
             <Route path="/add" element={<AddPurchase />} />
             <Route path="/insights" element={<Insights />} />
+            <Route path="/subscriptions" element={<Subscriptions />} />
             <Route path="/settings" element={<BudgetSetup />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
