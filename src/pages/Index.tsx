@@ -202,6 +202,32 @@ export default function Dashboard() {
         </div>
       )}
 
+      {/* Recent Receipts */}
+      {recentReceipts.length > 0 && (
+        <div className="card-soft p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-semibold flex items-center gap-2"><FileText className="h-4 w-4 text-primary" />Recent Receipts</h2>
+            <Link to="/receipts" className="text-xs text-primary hover:underline">View all →</Link>
+          </div>
+          <div className="space-y-2">
+            {recentReceipts.map((r) => (
+              <Link key={r.id} to="/receipts" className="flex items-center justify-between rounded-2xl px-3 py-3 hover:bg-muted/50 transition-all">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 items-center justify-center rounded-full text-xs font-bold text-card" style={{ backgroundColor: CATEGORY_COLORS[r.category as Category] || CATEGORY_COLORS.Other }}>
+                    {r.merchant.charAt(0)}
+                  </div>
+                  <div>
+                    <p className="font-medium text-sm">{r.merchant}</p>
+                    <p className="text-xs text-muted-foreground">{format(parseISO(r.date), "d MMM")} · {r.category}</p>
+                  </div>
+                </div>
+                <span className="font-mono text-sm font-semibold">£{r.amount.toFixed(2)}</span>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Transaction list */}
       <div className="card-soft p-6">
         <div className="flex items-center justify-between mb-4">
