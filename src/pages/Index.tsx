@@ -20,6 +20,8 @@ export default function Dashboard() {
     toggleCancelReminder,
     deleteTransaction,
   } = useTransactions();
+  const { receipts } = useReceiptVault();
+  const recentReceipts = receipts.slice(0, 3);
 
   const [period, setPeriod] = useState<"monthly" | "weekly">("monthly");
   const [sortBy, setSortBy] = useState<"date" | "category">("date");
