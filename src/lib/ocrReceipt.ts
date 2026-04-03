@@ -38,45 +38,13 @@ const MERCHANT_DISPLAY: Record<string, string> = {
 };
 
 /**
- * Extract text from a PDF file using pdfjs-dist.
- */
-async function extractTextFromPdf(file: File): Promise<string> {
-  const pdfjsLib = await import("pdfjs-dist");
-  // Use the bundled worker
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.0.379/pdf.worker.min.mjs`;
-
-  const arrayBuffer = await file.arrayBuffer();
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
-
-  const textParts: string[] = [];
-  for (let i = 1; i <= Math.min(pdf.numPages, 5); i++) {
-    const page = await pdf.getPage(i);
-    const content = await page.getTextContent();
-    const pageText = content.items
-      .map((item: any) => ("str" in item ? item.str : ""))
-      .join(" ");
-    textParts.push(pageText);
-  }
-
-  return textParts.join("\n");
-}
-
-/**
- * Process a receipt file — handles both images (OCR) and PDFs (text extraction).
+ * Process a receipt image via OCR.
  */
 export async function ocrReceipt(file: File): Promise<ParsedReceipt> {
-  let text: string;
-
-  if (file.type === "application/pdf") {
-    text = await extractTextFromPdf(file);
-  } else {
-    const { data } = await Tesseract.recognize(file, "eng", {
-      logger: () => {},
-    });
-    text = data.text;
-  }
-
-  return parseReceiptText(text);
+  const { data } = await Tesseract.recognize(file, "eng", {
+    logger: () => {},
+  });
+  return parseReceiptText(data.text);
 }
 
 /**
