@@ -1,11 +1,13 @@
 import { useMemo, useState } from "react";
 import { useTransactions } from "@/hooks/useTransactions";
+import { useReceiptVault } from "@/hooks/useReceiptVault";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import CircularProgress from "@/components/CircularProgress";
 import { CATEGORIES, CATEGORY_COLORS, Category } from "@/types/transaction";
 import { format, parseISO } from "date-fns";
-import { ArrowDown, ArrowUp, Bell, BellOff, TrendingUp, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, Bell, BellOff, FileText, TrendingUp, Trash2 } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export default function Dashboard() {
   const {
